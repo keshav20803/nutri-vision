@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Results</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Your Nutritional Recommendations</h1>
+      <p>Your BMR is {{ bmr }} calories/day.</p>
+      <p>Your BMI is {{ bmi }}.</p>
+      <p>Your TDEE is {{ tdee }} calories/day.</p>
+      <p>
+        To {{ goal }}, you should aim for {{ adjusted_calories }} calories per
+        day.
+      </p>
+      <p>
+        Your recommended protein intake is {{ protein_intake_grams }} grams per
+        day.
+      </p>
+      <p>
+        You should consume no more than {{ fat_calories }} calories from fat per
+        day, which is about {{ fat_grams }} grams of fat.
+      </p>
+      <p>You should aim for about {{ fiber_intake }} grams of fiber per day.</p>
+      <p>
+        You should consume no more than {{ sugar_intake }} grams of sugar per
+        day.
+      </p>
+      <p>Your sodium intake should be less than 2000 mg per day.</p>
+      <h2>Lunch Recommendations</h2>
+      <p>Calories: {{ lunch_calories }} kcal</p>
+      <p>Protein: {{ lunch_protein }} grams</p>
+      <p>Carbohydrates: {{ lunch_carbohydrates }} grams</p>
+      <p>Fat: {{ lunch_fat_grams }} grams</p>
+      <p>Fiber: {{ lunch_fiber }} grams</p>
+      <p>Sugar: {{ lunch_sugar }} grams</p>
+      <p>Sodium: less than {{ lunch_sodium }} mg</p>
+      <h2>Top Food Recommendations</h2>
+      <ul>
+        {% for food in top_recommendations %}
+        <li>{{ food }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </body>
+</html>

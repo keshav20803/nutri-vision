@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nutritional Analysis Result</title>
+  </head>
+  <body>
+    <h1>Nutritional Analysis Result</h1>
+    <img
+      src="{{ image_url }}"
+      alt="Uploaded Image"
+      style="width: 300px"
+    /><br /><br />
+    <h2>Nutritional Information</h2>
+    <p>Calories: {{ nutritional_info.calories }} kcal</p>
+    <p>Proteins: {{ nutritional_info.proteins }} g</p>
+    <p>Fats: {{ nutritional_info.fats }} g</p>
+    <p>Carbohydrates: {{ nutritional_info.carbohydrates }} g</p>
+    <p>Fibers: {{ nutritional_info.fiber }} g</p>
+    <p>Sugar: {{ nutritional_info.sugar }} g</p>
+    <p>Sodium: {{ nutritional_info.sodium }} mg</p>
+  </body>
+</html>
