@@ -48,11 +48,17 @@
           </option></select
         ><br />
         <button type="submit">Calculate</button>
-
-        <button onclick="window.location.href='{{ url_for('upload') }}'">
-          Upload Meal
-        </button>
       </form>
+
+      <button id="uploadMealButton">Upload Meal</button>
     </div>
+
+    <script>
+      document
+        .getElementById("uploadMealButton")
+        .addEventListener("click", function () {
+          window.location.href = '{{ url_for("upload") }}';
+        });
+    </script>
   </body>
 </html>

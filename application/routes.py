@@ -3,17 +3,13 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.model_selection import train_test_split
 from application import app,db,imageup
-from bson import ObjectId
 
 food_data = pd.read_csv('meals_dataset_descriptive.csv')
 
+def extract_nutri_fromdb():
+    meals=db.meals.find()
 
-def extract_nutri_fromdb(meal_type):
-    meals=db.meals.find({
-        "meal_type":meal_type
-    })
     meal_nutrition_db = {
         "calories": 0,
         "proteins": 0,
@@ -125,12 +121,13 @@ def calculate():
         'sugar': sugar_intake,
         'sodium': 2000
     }
-
-    meal_nutrition_db=extract_nutri_fromdb(meal_type="breakfast")
-    difference = calculate_nutritional_difference(meal_nutrition_db,user_nutrition)
     
+    meal_nutrition_db=extract_nutri_fromdb()
+    difference = calculate_nutritional_difference(meal_nutrition_db,user_nutrition)
+
+    count = db.meals.count_documents({})
     for nutrient in difference:
-        difference[nutrient]=difference[nutrient]/2
+        difference[nutrient]=difference[nutrient]/(4-count)
 
     next_meal_calories = difference['calories']
     next_meal_protein =  difference['proteins']
@@ -161,6 +158,7 @@ def calculate():
     top_recommendations = filtered_adjusted_food_data.sort_values(by='Similarity', ascending=False).head()
     top_recommendations_list = top_recommendations['Meal Name'].tolist()
 
+    
     return render_template('results.html', bmr=bmr, bmi=bmi, tdee=tdee, adjusted_calories=adjusted_calories,
                            goal=goal, protein_intake_grams=protein_intake_grams, fat_calories=fat_calories,
                            fat_grams=fat_grams, fiber_intake=fiber_intake, sugar_intake=sugar_intake,
@@ -176,21 +174,24 @@ def upload():
         meal_type = request.form['meal_type']
         uploaded_image = request.files['image']
         
-        def upload_meal(meal_type, image_url, nutritional_info):
+        def upload_or_update_meal(meal_type, image_url, nutritional_info):
+            existing_meal = db.meals.find_one({"meal_type": meal_type})
             meal_data = {
                 "meal_type": meal_type,
                 "image_url": image_url,
                 "nutritional_info": nutritional_info
             }
-            db.meals.insert_one(meal_data)
+            if existing_meal:
+                db.meals.update_one({"_id": existing_meal["_id"]}, {"$set": meal_data})
+            else:
+                db.meals.insert_one(meal_data)
 
         if uploaded_image:
             image = imageup.Image.open(imageup.io.BytesIO(uploaded_image.read()))
             image.save(f'static/uploads/{uploaded_image.filename}')
             
             nutritional_info = imageup.process_image(uploaded_image)
-              # Upload meal to MongoDB
-            upload_meal(meal_type, f'static/uploads/{uploaded_image.filename}', nutritional_info)
+            upload_or_update_meal(meal_type, f'static/uploads/{uploaded_image.filename}', nutritional_info)
             
             return render_template('resultimage.html', nutritional_info=nutritional_info, image_url=f'static/uploads/{uploaded_image.filename}')
         else:
@@ -198,30 +199,3 @@ def upload():
     
     return render_template('upload.html')
 
-# @app.route('/update_meal',methods=['GET', 'POST'])
-# def update_meal(id):
-#      if request.method == 'POST':
-#         meal_type = request.form['meal_type']
-#         uploaded_image = request.files['image']
-
-#         def upload_meal(meal_type, image_url, nutritional_info):
-#             meal_data = {
-#                 "meal_type": meal_type,
-#                 "image_url": image_url,
-#                 "nutritional_info": nutritional_info
-#             }
-#             db.meals.find_one_and_update({"_id": ObjectId(id)},{"$set":meal_data})
-        
-#         if uploaded_image:
-#             image = imageup.Image.open(imageup.io.BytesIO(uploaded_image.read()))
-#             image.save(f'static/uploads/{uploaded_image.filename}')
-            
-#             nutritional_info = imageup.process_image(uploaded_image)
-#               # Upload meal to MongoDB
-#             upload_meal(meal_type, f'static/uploads/{uploaded_image.filename}', nutritional_info)
-            
-#             return render_template('resultimage.html', nutritional_info=nutritional_info, image_url=f'static/uploads/{uploaded_image.filename}')
-#         else:
-#             return 'No image uploaded', 400
-    
-#     return render_template('upload.html')
